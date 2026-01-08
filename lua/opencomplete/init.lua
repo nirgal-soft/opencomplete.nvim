@@ -55,7 +55,8 @@ end
 -- Setup user commands
 function M.setup_commands()
   vim.api.nvim_create_user_command('OpenComplete', function(opts)
-    local subcmd = opts.args
+    local args = vim.split(opts.args, '%s+')
+    local subcmd = args[1] or ''
 
     if subcmd == 'status' then
       M.print_status()
@@ -79,13 +80,33 @@ function M.setup_commands()
     elseif subcmd == 'debug' then
       log.level = 'debug'
       vim.notify('OpenComplete: debug logging enabled')
+    elseif subcmd == 'provider' then
+      local provider = args[2]
+      if provider then
+        vim.g.opencomplete_provider = provider
+        vim.notify('OpenComplete: provider set to ' .. provider)
+      else
+        local current = vim.g.opencomplete_provider or config.options.completion.provider or 'default'
+        vim.notify('OpenComplete: current provider is ' .. current)
+      end
     else
-      vim.notify('Usage: OpenComplete [status|enable|disable|toggle|health|debug]')
+      vim.notify('Usage: OpenComplete [status|enable|disable|toggle|health|debug|provider <name>]')
     end
   end, {
-    nargs = '?',
-    complete = function()
-      return { 'status', 'enable', 'disable', 'toggle', 'health', 'debug' }
+    nargs = '*',
+    complete = function(arg_lead, cmd_line)
+      local args = vim.split(cmd_line, '%s+')
+      if #args <= 2 then
+        return { 'status', 'enable', 'disable', 'toggle', 'health', 'debug', 'provider' }
+      elseif args[2] == 'provider' then
+        -- Return available providers
+        local providers = {}
+        for _, p in ipairs(server.status.providers) do
+          table.insert(providers, p.id)
+        end
+        return providers
+      end
+      return {}
     end,
   })
 end

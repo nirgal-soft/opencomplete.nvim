@@ -77,4 +77,14 @@ function M.get_style_hints(ft)
   return M.options.completion.style_hints
 end
 
+-- Get provider
+-- Priority: 1. vim.g.opencomplete_provider (runtime override)
+--           2. completion.provider (config)
+function M.get_provider()
+  if vim.g.opencomplete_provider then
+    return vim.g.opencomplete_provider
+  end
+  return M.options.completion.provider
+end
+
 return M

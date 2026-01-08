@@ -156,7 +156,7 @@ local function build_request()
     file_path = file_path,
     max_tokens = max_tokens,
     stop = stop,
-    provider = config.options.completion.provider,
+    provider = config.get_provider(),
     style_hints = style_hints,
   }
 end
